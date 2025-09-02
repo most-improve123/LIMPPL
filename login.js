@@ -25,6 +25,20 @@ function hideLoading() {
 function generateRandomToken() {
   return crypto.randomUUID();
 }
+
+// Función para verificar si el correo existe en Firestore
+async function checkIfEmailExists(email) {
+  try {
+    const usersRef = db.collection('users');
+    const query = usersRef.where('email', '==', email).limit(1);
+    const snapshot = await query.get();
+    return !snapshot.empty;
+  } catch (error) {
+    console.error("Error al verificar el correo:", error);
+    return false;
+  }
+}
+
 // Función para enviar el enlace mágico
 async function sendMagicLink() {
   const email = document.getElementById('magic-link-email').value;
@@ -32,12 +46,24 @@ async function sendMagicLink() {
     showToast('error', 'Correo requerido', 'Por favor ingresa tu correo electrónico.');
     return;
   }
+
   // Deshabilitar el botón para evitar múltiples clics
   const sendButton = document.querySelector('#magic-link-modal .btn-primary');
   sendButton.disabled = true;
-  sendButton.textContent = 'Enviando...';
+  sendButton.textContent = 'Verificando...';
+
   try {
     showLoading();
+
+    // Verificar si el correo existe en Firestore
+    const emailExists = await checkIfEmailExists(email);
+
+    if (!emailExists) {
+      showToast('error', 'Correo no registrado', 'El correo no está registrado. Por favor, regístrate primero.');
+      return;
+    }
+
+    sendButton.textContent = 'Enviando...';
     const token = generateRandomToken();
     localStorage.setItem('magicLinkToken', token);
     localStorage.setItem('magicLinkEmail', email);
