@@ -50,7 +50,7 @@ async function sendMagicLink() {
     const token = generateRandomToken();
     localStorage.setItem('magicLinkToken', token);
     localStorage.setItem('magicLinkEmail', email);
-const magicLink = `http://localhost:5500/login.html?token=${token}&email=${encodeURIComponent(email)}`;
+const magicLink = `https://most-improve123.github.io/LIMPPL/login.html?token=${token}&email=${encodeURIComponent(email)}`;
 
     await sendBrevoMagicLinkEmail(email, magicLink);
     showToast('success', 'Enlace enviado', 'Revisa tu correo para iniciar sesión.');
