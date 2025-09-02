@@ -50,7 +50,8 @@ async function sendMagicLink() {
     const token = generateRandomToken();
     localStorage.setItem('magicLinkToken', token);
     localStorage.setItem('magicLinkEmail', email);
-    const magicLink = `${window.location.origin}/login.html?token=${token}&email=${encodeURIComponent(email)}`;
+const magicLink = `http://localhost:5500/login.html?token=${token}&email=${encodeURIComponent(email)}`;
+
     await sendBrevoMagicLinkEmail(email, magicLink);
     showToast('success', 'Enlace enviado', 'Revisa tu correo para iniciar sesión.');
     document.getElementById('magic-link-modal').classList.add('hidden');
