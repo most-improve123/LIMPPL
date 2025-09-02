@@ -7,31 +7,24 @@ const firebaseConfig = {
   messagingSenderId: "466535430209",
   appId: "1:466535430209:web:4e49fde0578fb037042ec0"
 };
-
 // Inicializar Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
-
-
 // Función para mostrar loading
 function showLoading() {
   const loadingElement = document.getElementById('loading');
   if (loadingElement) loadingElement.classList.remove('hidden');
 }
-
 // Función para ocultar loading
 function hideLoading() {
   const loadingElement = document.getElementById('loading');
   if (loadingElement) loadingElement.classList.add('hidden');
 }
-
 // Función para generar un token aleatorio
 function generateRandomToken() {
   return crypto.randomUUID();
 }
-
 // Función para enviar el enlace mágico
 async function sendMagicLink() {
   const email = document.getElementById('magic-link-email').value;
@@ -39,19 +32,16 @@ async function sendMagicLink() {
     showToast('error', 'Correo requerido', 'Por favor ingresa tu correo electrónico.');
     return;
   }
-
   // Deshabilitar el botón para evitar múltiples clics
   const sendButton = document.querySelector('#magic-link-modal .btn-primary');
   sendButton.disabled = true;
   sendButton.textContent = 'Enviando...';
-
   try {
     showLoading();
     const token = generateRandomToken();
     localStorage.setItem('magicLinkToken', token);
     localStorage.setItem('magicLinkEmail', email);
-const magicLink = `https://most-improve123.github.io/LIMPPL/login.html?token=${token}&email=${encodeURIComponent(email)}`;
-
+    const magicLink = `https://most-improve123.github.io/LIMPPL/login.html?token=${token}&email=${encodeURIComponent(email)}`;
     await sendBrevoMagicLinkEmail(email, magicLink);
     showToast('success', 'Enlace enviado', 'Revisa tu correo para iniciar sesión.');
     document.getElementById('magic-link-modal').classList.add('hidden');
@@ -65,7 +55,6 @@ const magicLink = `https://most-improve123.github.io/LIMPPL/login.html?token=${t
     sendButton.textContent = 'Enviar enlace mágico';
   }
 }
-
 // Función para enviar el correo con Brevo
 async function sendBrevoMagicLinkEmail(email, magicLink) {
   try {
@@ -76,12 +65,10 @@ async function sendBrevoMagicLinkEmail(email, magicLink) {
       },
       body: JSON.stringify({ email, magicLink }),
     });
-
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.error || 'Error al enviar el correo.');
     }
-
     console.log("Correo enviado con éxito:", data);
     return data;
   } catch (error) {
@@ -89,7 +76,6 @@ async function sendBrevoMagicLinkEmail(email, magicLink) {
     throw error;
   }
 }
-
 // Manejo del modal de enlace mágico y recuperación de contraseña
 document.addEventListener('DOMContentLoaded', function() {
   // Modal de recuperación de contraseña
@@ -107,7 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
       modal.classList.add('hidden');
     });
   }
-
   // Modal de enlace mágico
   const magicLinkRequest = document.getElementById('magic-link-request');
   const magicLinkModal = document.getElementById('magic-link-modal');
@@ -123,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
       magicLinkModal.classList.add('hidden');
     });
   }
-
   // Verifica si hay un token en la URL al cargar la página
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
@@ -136,8 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Token almacenado:', storedToken);
     console.log('Email almacenado:', storedEmail);
     if (token === storedToken && email === storedEmail) {
-      console.log('Token y email coinciden. Redirigiendo...');
-      showToast('success', 'Inicio de sesión exitoso', '¡Bienvenido!');
+      console.log('Token y email coinciden. Guardando datos en localStorage...');
 
       // Obtener el rol del usuario desde Firestore
       const usersRef = db.collection('users');
@@ -148,20 +131,35 @@ document.addEventListener('DOMContentLoaded', function() {
           const userData = querySnapshot.docs[0].data();
           localStorage.setItem('userName', email.split('@')[0]);
           localStorage.setItem('userRole', userData.role);
-          setTimeout(() => {
-            window.location.href = 'prueba.html';
-          }, 2000);
+
+          // Generar un UID simulado para mantener compatibilidad con prueba.js
+          const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
+          localStorage.setItem('userUID', simulatedUID);
         } else {
           localStorage.setItem('userName', email.split('@')[0]);
           localStorage.setItem('userRole', 'graduate');
-          setTimeout(() => {
-            window.location.href = 'prueba.html';
-          }, 2000);
+
+          // Generar un UID simulado para mantener compatibilidad con prueba.js
+          const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
+          localStorage.setItem('userUID', simulatedUID);
         }
+
+        showToast('success', 'Inicio de sesión exitoso', '¡Bienvenido!');
+        setTimeout(() => {
+          window.location.href = 'prueba.html';
+        }, 2000);
       }).catch((error) => {
         console.error("Error al obtener el rol del usuario:", error);
+
+        // Si hay un error, asigna valores por defecto
         localStorage.setItem('userName', email.split('@')[0]);
         localStorage.setItem('userRole', 'graduate');
+
+        // Generar un UID simulado para mantener compatibilidad con prueba.js
+        const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
+        localStorage.setItem('userUID', simulatedUID);
+
+        showToast('success', 'Inicio de sesión exitoso', '¡Bienvenido!');
         setTimeout(() => {
           window.location.href = 'prueba.html';
         }, 2000);
@@ -172,7 +170,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
-
 // Función para enviar el correo de recuperación de contraseña
 function sendPasswordResetEmail() {
   const email = document.getElementById('recovery-email').value;
@@ -190,7 +187,6 @@ function sendPasswordResetEmail() {
       showToast('error', 'Error', error.message);
     });
 }
-
 // Función para mostrar mensajes toast
 function showToast(type, title, description = '') {
   const container = document.getElementById('toast-container');
@@ -214,7 +210,6 @@ function showToast(type, title, description = '') {
     }
   }, 5000);
 }
-
 // Manejo del formulario de login
 document.getElementById('login-form').addEventListener('submit', async function(e) {
   e.preventDefault();
