@@ -39,15 +39,18 @@ async function sendMagicLink() {
     showToast('error', 'Correo requerido', 'Por favor ingresa tu correo electrónico.');
     return;
   }
+
+  // Deshabilitar el botón para evitar múltiples clics
+  const sendButton = document.querySelector('#magic-link-modal .btn-primary');
+  sendButton.disabled = true;
+  sendButton.textContent = 'Enviando...';
+
   try {
     showLoading();
     const token = generateRandomToken();
     localStorage.setItem('magicLinkToken', token);
     localStorage.setItem('magicLinkEmail', email);
-    console.log('Token guardado en localStorage:', localStorage.getItem('magicLinkToken'));
-    console.log('Email guardado en localStorage:', localStorage.getItem('magicLinkEmail'));
     const magicLink = `${window.location.origin}/login.html?token=${token}&email=${encodeURIComponent(email)}`;
-    console.log('URL del enlace mágico:', magicLink);
     await sendBrevoMagicLinkEmail(email, magicLink);
     showToast('success', 'Enlace enviado', 'Revisa tu correo para iniciar sesión.');
     document.getElementById('magic-link-modal').classList.add('hidden');
@@ -56,6 +59,9 @@ async function sendMagicLink() {
     showToast('error', 'Error', error.message);
   } finally {
     hideLoading();
+    // Volver a habilitar el botón
+    sendButton.disabled = false;
+    sendButton.textContent = 'Enviar enlace mágico';
   }
 }
 
