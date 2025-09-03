@@ -40,6 +40,23 @@ async function checkIfEmailExists(email) {
 }
 
 // Función para enviar el enlace mágico
+// Función para obtener la URL base según el entorno
+function getBaseUrl() {
+  // Si estás en localhost (desarrollo)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return `http://${window.location.hostname}:${window.location.port}`;
+  }
+  // Si estás en GitHub Pages (producción)
+  else if (window.location.hostname.includes('github.io')) {
+    return `https://${window.location.hostname}`;
+  }
+  // Para otros dominios (Render, Vercel, etc.)
+  else {
+    return `https://${window.location.hostname}`;
+  }
+}
+
+// Función para enviar el enlace mágico (actualizada)
 async function sendMagicLink() {
   const email = document.getElementById('magic-link-email').value;
   if (!email) {
@@ -67,7 +84,11 @@ async function sendMagicLink() {
     const token = generateRandomToken();
     localStorage.setItem('magicLinkToken', token);
     localStorage.setItem('magicLinkEmail', email);
-    const magicLink = `https://most-improve123.github.io/LIMPPL/login.html?token=${token}&email=${encodeURIComponent(email)}`;
+
+    // Generar el enlace mágico con la URL base correcta
+    const baseUrl = getBaseUrl();
+    const magicLink = `${baseUrl}/login.html?token=${token}&email=${encodeURIComponent(email)}`;
+
     await sendBrevoMagicLinkEmail(email, magicLink);
     showToast('success', 'Enlace enviado', 'Revisa tu correo para iniciar sesión.');
     document.getElementById('magic-link-modal').classList.add('hidden');
