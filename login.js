@@ -40,20 +40,22 @@ async function checkIfEmailExists(email) {
 }
 
 // Función para enviar el enlace mágico
+// Función para obtener la URL base según el entorno
 function getBaseUrl() {
   // Si estás en localhost (desarrollo)
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `http://${window.location.hostname}:${window.location.port}/LIMPPL`;
+    return `http://${window.location.hostname}:${window.location.port}`;
   }
   // Si estás en GitHub Pages (producción)
   else if (window.location.hostname.includes('github.io')) {
-    return `https://${window.location.hostname}/LIMPPL`;
+    return `https://${window.location.hostname}`;
   }
   // Para otros dominios (Render, Vercel, etc.)
   else {
-    return `${window.location.protocol}//${window.location.hostname}/LIMPPL`;
+    return `https://${window.location.hostname}`;
   }
 }
+
 // Función para enviar el enlace mágico (actualizada)
 async function sendMagicLink() {
   const email = document.getElementById('magic-link-email').value;
