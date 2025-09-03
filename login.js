@@ -40,22 +40,20 @@ async function checkIfEmailExists(email) {
 }
 
 // Función para enviar el enlace mágico
-// Función para obtener la URL base según el entorno
 function getBaseUrl() {
   // Si estás en localhost (desarrollo)
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return `http://${window.location.hostname}:${window.location.port}`;
+    return `http://${window.location.hostname}:${window.location.port}/LIMPPL`;
   }
   // Si estás en GitHub Pages (producción)
   else if (window.location.hostname.includes('github.io')) {
-    return `https://${window.location.hostname}`;
+    return `https://${window.location.hostname}/LIMPPL`;
   }
   // Para otros dominios (Render, Vercel, etc.)
   else {
-    return `https://${window.location.hostname}`;
+    return `${window.location.protocol}//${window.location.hostname}/LIMPPL`;
   }
 }
-
 // Función para enviar el enlace mágico (actualizada)
 async function sendMagicLink() {
   const email = document.getElementById('magic-link-email').value;
@@ -67,7 +65,7 @@ async function sendMagicLink() {
   // Deshabilitar el botón para evitar múltiples clics
   const sendButton = document.querySelector('#magic-link-modal .btn-primary');
   sendButton.disabled = true;
-  sendButton.textContent = 'Verificando...';
+  sendButton.textContent = 'Checking...';
 
   try {
     showLoading();
@@ -76,7 +74,7 @@ async function sendMagicLink() {
     const emailExists = await checkIfEmailExists(email);
 
     if (!emailExists) {
-      showToast('error', 'Correo no registrado', 'El correo no está registrado. Por favor, regístrate primero.');
+      showToast('error', 'Unregistered email', 'The email is not registered. Please register first.');
       return;
     }
 
