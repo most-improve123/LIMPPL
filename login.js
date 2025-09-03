@@ -34,7 +34,7 @@ async function checkIfEmailExists(email) {
     const snapshot = await query.get();
     return !snapshot.empty;
   } catch (error) {
-    console.error("Error al verificar el correo:", error);
+    console.error("Error verifying the email:", error);
     return false;
   }
 }
@@ -48,7 +48,7 @@ function getBaseUrl() {
   }
   // Si estás en GitHub Pages (producción)
   else if (window.location.hostname.includes('github.io')) {
-    return `https://${window.location.hostname}`;
+    return 'https://most-improve123.github.io/LIMPPL';
   }
   // Para otros dominios (Render, Vercel, etc.)
   else {
@@ -60,7 +60,7 @@ function getBaseUrl() {
 async function sendMagicLink() {
   const email = document.getElementById('magic-link-email').value;
   if (!email) {
-    showToast('error', 'Correo requerido', 'Por favor ingresa tu correo electrónico.');
+    showToast('error', 'Email required', 'Please enter your email address.');
     return;
   }
 
@@ -80,7 +80,7 @@ async function sendMagicLink() {
       return;
     }
 
-    sendButton.textContent = 'Enviando...';
+    sendButton.textContent = 'Sending...';
     const token = generateRandomToken();
     localStorage.setItem('magicLinkToken', token);
     localStorage.setItem('magicLinkEmail', email);
@@ -90,16 +90,16 @@ async function sendMagicLink() {
     const magicLink = `${baseUrl}/login.html?token=${token}&email=${encodeURIComponent(email)}`;
 
     await sendBrevoMagicLinkEmail(email, magicLink);
-    showToast('success', 'Enlace enviado', 'Revisa tu correo para iniciar sesión.');
+    showToast('success', 'Link sent', 'Check your email to log in.');
     document.getElementById('magic-link-modal').classList.add('hidden');
   } catch (error) {
-    console.error("Error al enviar el enlace mágico:", error);
+    console.error("Error sending the magic link:", error);
     showToast('error', 'Error', error.message);
   } finally {
     hideLoading();
     // Volver a habilitar el botón
     sendButton.disabled = false;
-    sendButton.textContent = 'Enviar enlace mágico';
+    sendButton.textContent = 'Send magic link';
   }
 }
 // Función para enviar el correo con Brevo
@@ -114,12 +114,12 @@ async function sendBrevoMagicLinkEmail(email, magicLink) {
     });
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || 'Error al enviar el correo.');
+      throw new Error(data.error || 'Error sending the email.');
     }
-    console.log("Correo enviado con éxito:", data);
+    console.log("Email sent successfully:", data);
     return data;
   } catch (error) {
-    console.error("Error al enviar el correo:", error);
+    console.error("Error sending the email:", error);
     throw error;
   }
 }
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
           localStorage.setItem('userUID', simulatedUID);
         }
 
-        showToast('success', 'Inicio de sesión exitoso', '¡Bienvenido!');
+        showToast('success', 'Successful login', 'Welcome!');
         setTimeout(() => {
           window.location.href = 'prueba.html';
         }, 2000);
@@ -206,14 +206,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
         localStorage.setItem('userUID', simulatedUID);
 
-        showToast('success', 'Inicio de sesión exitoso', '¡Bienvenido!');
+        showToast('success', 'Successful login', 'Welcome!');
         setTimeout(() => {
           window.location.href = 'prueba.html';
         }, 2000);
       });
     } else {
       console.log('Token o email no coinciden.');
-      showToast('error', 'Enlace inválido', 'El enlace mágico no es válido o ha expirado.');
+      showToast('error', 'Invalid link', 'The magic link is not valid or has expired.');
     }
   }
 });
@@ -221,16 +221,16 @@ document.addEventListener('DOMContentLoaded', function() {
 function sendPasswordResetEmail() {
   const email = document.getElementById('recovery-email').value;
   if (!email) {
-    showToast('error', 'Correo requerido', 'Por favor ingresa tu correo electrónico.');
+    showToast('error', 'Email required', 'Please enter your email address.');
     return;
   }
   auth.sendPasswordResetEmail(email)
     .then(() => {
-      showToast('success', 'Correo enviado', 'Revisa tu bandeja de entrada para restablecer tu contraseña.');
+      showToast('success', 'Email sent', 'Check your inbox to reset your password.');
       document.getElementById('forgot-password-modal').classList.add('hidden');
     })
     .catch((error) => {
-      console.error("Error al enviar el correo de recuperación:", error);
+      console.error("Error sending the recovery email:", error);
       showToast('error', 'Error', error.message);
     });
 }
@@ -276,13 +276,13 @@ document.getElementById('login-form').addEventListener('submit', async function(
         localStorage.setItem('userName', userData.name);
         localStorage.setItem('userRole', userData.role);
       }
-      showToast('success', '¡Inicio de sesión exitoso!', 'Bienvenido de vuelta.');
+      showToast('success', 'Login successful!', 'Welcome back.');
       setTimeout(() => {
         window.location.href = 'prueba.html';
       }, 2000);
     })
     .catch((error) => {
       console.error("Error signing in: ", error);
-      showToast('error', 'Error de inicio de sesión', error.message);
+      showToast('error', 'Login error', error.message);
     });
 });
