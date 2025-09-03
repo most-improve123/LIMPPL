@@ -653,6 +653,30 @@ function updateAdminStats() {
   document.getElementById('admin-total-courses').textContent = coursesCache.length || 0;
   document.getElementById('admin-total-certificates').textContent = totalCertificates || 0;
 }
+// Función para escuchar cambios en tiempo real en los certificados
+function setupCertificateListener(userId) {
+  return dbCertificates.collection("certificates")
+    .where("userId", "==", userId)
+    .onSnapshot((snapshot) => {
+      const certificates = [];
+      snapshot.forEach((doc) => {
+        certificates.push({ id: doc.id, ...doc.data() });
+      });
+      displayCertificates(certificates); // Función para mostrar certificados en la UI
+    });
+}
+
+// Función para guardar un nuevo certificado
+async function saveCertificate(certificateData) {
+  const userId = localStorage.getItem('userUID');
+  await dbCertificates.collection("certificates").add({
+    ...certificateData,
+    userId: userId,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+
 
 // Función para mostrar toast de confirmación
 let userIdToDelete = null;
@@ -789,20 +813,24 @@ function loadViewData(viewName) {
   }
 }
 
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+    // Inicializar Firebase y otras configuraciones
+  })
+  .catch((error) => {
+    console.error("Error al habilitar la persistencia:", error);
+  });
+
+
 // Función para cargar datos de graduado
+// Función para cargar datos del graduado
 function loadGraduateData() {
   showLoading();
+  const userId = localStorage.getItem('userUID');
+  if (userId) {
+    setupCertificateListener(userId);
+  }
   setTimeout(() => {
-    const mockCertificates = coursesCache.map(course => ({
-      id: course.id,
-      nombre: 'John Doe',
-      certificateId: `WS-2025-${course.id.toString().padStart(3, '0')}`,
-      completionDate: '2023-01-15',
-      course: course
-    }));
-    certificatesCache = mockCertificates;
-    displayCertificates(mockCertificates);
-    updateGraduateStats(mockCertificates);
     hideLoading();
   }, 500);
 }
