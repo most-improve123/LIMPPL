@@ -56,6 +56,12 @@ function getBaseUrl() {
   }
 }
 
+// Función para guardar datos del usuario
+async function saveUserData(userId, userData) {
+  await db.collection("users").doc(userId).set(userData);
+}
+
+
 // Función para enviar el enlace mágico (actualizada)
 async function sendMagicLink() {
   const email = document.getElementById('magic-link-email').value;
@@ -162,60 +168,52 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('Token en URL:', token);
   console.log('Email en URL:', email);
   if (token && email) {
-    const storedToken = localStorage.getItem('magicLinkToken');
-    const storedEmail = localStorage.getItem('magicLinkEmail');
-    console.log('Token almacenado:', storedToken);
-    console.log('Email almacenado:', storedEmail);
-    if (token === storedToken && email === storedEmail) {
-      console.log('Token y email coinciden. Guardando datos en localStorage...');
-
-      // Obtener el rol del usuario desde Firestore
-      const usersRef = db.collection('users');
-      const query = usersRef.where('email', '==', email).limit(1);
-
-      query.get().then((querySnapshot) => {
-        if (!querySnapshot.empty) {
-          const userData = querySnapshot.docs[0].data();
-          localStorage.setItem('userName', email.split('@')[0]);
-          localStorage.setItem('userRole', userData.role);
-
-          // Generar un UID simulado para mantener compatibilidad con prueba.js
-          const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
-          localStorage.setItem('userUID', simulatedUID);
-        } else {
-          localStorage.setItem('userName', email.split('@')[0]);
-          localStorage.setItem('userRole', 'graduate');
-
-          // Generar un UID simulado para mantener compatibilidad con prueba.js
-          const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
-          localStorage.setItem('userUID', simulatedUID);
-        }
-
-        showToast('success', 'Successful login', 'Welcome!');
-        setTimeout(() => {
-          window.location.href = 'prueba.html';
-        }, 2000);
-      }).catch((error) => {
-        console.error("Error al obtener el rol del usuario:", error);
-
-        // Si hay un error, asigna valores por defecto
+  const storedToken = localStorage.getItem('magicLinkToken');
+  const storedEmail = localStorage.getItem('magicLinkEmail');
+  if (token === storedToken && email === storedEmail) {
+    console.log('Token y email coinciden. Guardando datos en localStorage...');
+    const usersRef = db.collection('users');
+    const query = usersRef.where('email', '==', email).limit(1);
+    query.get().then((querySnapshot) => {
+      if (!querySnapshot.empty) {
+        const userData = querySnapshot.docs[0].data();
         localStorage.setItem('userName', email.split('@')[0]);
-        localStorage.setItem('userRole', 'graduate');
-
-        // Generar un UID simulado para mantener compatibilidad con prueba.js
+        localStorage.setItem('userRole', userData.role);
         const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
         localStorage.setItem('userUID', simulatedUID);
-
-        showToast('success', 'Successful login', 'Welcome!');
-        setTimeout(() => {
-          window.location.href = 'prueba.html';
-        }, 2000);
-      });
-    } else {
-      console.log('Token o email no coinciden.');
-      showToast('error', 'Invalid link', 'The magic link is not valid or has expired.');
-    }
+      } else {
+        localStorage.setItem('userName', email.split('@')[0]);
+        localStorage.setItem('userRole', 'graduate');
+        const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
+        localStorage.setItem('userUID', simulatedUID);
+      }
+      showToast('success', 'Successful login', 'Welcome!');
+      setTimeout(() => {
+        window.location.href = 'prueba.html';
+      }, 2000);
+    }).catch((error) => {
+      console.error("Error al obtener el rol del usuario:", error);
+      localStorage.setItem('userName', email.split('@')[0]);
+      localStorage.setItem('userRole', 'graduate');
+      const simulatedUID = 'brevo-' + email.split('@')[0] + '-' + Date.now();
+      localStorage.setItem('userUID', simulatedUID);
+      showToast('success', 'Successful login', 'Welcome!');
+      setTimeout(() => {
+        window.location.href = 'prueba.html';
+      }, 2000);
+    });
   }
+}
+
+
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+    // Inicializar Firebase y otras configuraciones
+  })
+  .catch((error) => {
+    console.error("Error al habilitar la persistencia:", error);
+  });
+
 });
 // Función para enviar el correo de recuperación de contraseña
 function sendPasswordResetEmail() {
@@ -262,27 +260,27 @@ document.getElementById('login-form').addEventListener('submit', async function(
   e.preventDefault();
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
-  auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-    .then(() => {
-      return auth.signInWithEmailAndPassword(email, password);
-    })
-    .then(async (userCredential) => {
-      const user = userCredential.user;
-      console.log("UID del usuario autenticado:", user.uid);
-      localStorage.setItem('userUID', user.uid);
-      const userDoc = await db.collection('users').doc(user.uid).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        localStorage.setItem('userName', userData.name);
-        localStorage.setItem('userRole', userData.role);
-      }
-      showToast('success', 'Login successful!', 'Welcome back.');
-      setTimeout(() => {
-        window.location.href = 'prueba.html';
-      }, 2000);
-    })
-    .catch((error) => {
-      console.error("Error signing in: ", error);
-      showToast('error', 'Login error', error.message);
-    });
+ auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .then(() => {
+    return auth.signInWithEmailAndPassword(email, password);
+  })
+  .then(async (userCredential) => {
+    const user = userCredential.user;
+    console.log("UID del usuario autenticado:", user.uid);
+    localStorage.setItem('userUID', user.uid);
+    const userDoc = await db.collection('users').doc(user.uid).get();
+    if (userDoc.exists) {
+      const userData = userDoc.data();
+      localStorage.setItem('userName', userData.name);
+      localStorage.setItem('userRole', userData.role);
+    }
+    showToast('success', 'Login successful!', 'Welcome back.');
+    setTimeout(() => {
+      window.location.href = 'prueba.html';
+    }, 2000);
+  })
+  .catch((error) => {
+    console.error("Error signing in: ", error);
+    showToast('error', 'Login error', error.message);
+  });
 });
